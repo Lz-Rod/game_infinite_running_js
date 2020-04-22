@@ -17,9 +17,9 @@ var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3,
             altura: 50,
             largura: 50,
             cor: "#ff4e4e",
-            gravidade: 2,
+            gravidade: 1.6,
             velocidade: 0,
-            forcaDoPulo: 25,
+            forcaDoPulo: 23.6,
             qntPulos: 0,
 
             atualizar: function() {
@@ -35,7 +35,7 @@ var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3,
             pula: function() {
 
                 if(this.qntPulos < maxPulos){
-                this.velocidade = -this.forcaDoPulo;
+                this.velocidade = -this.forcaDoPulo
                 this.qntPulos ++
                 }
             },
@@ -43,6 +43,32 @@ var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3,
             desenhar: function() {
                 contexto.fillStyle = this.cor//define a cor do bloco
                 contexto.fillRect(this.x, this.y, this.altura, this.largura)// cria o objeto a partir doas informações do bloco
+            }
+        },
+        
+        obstaculos = {
+            _obs: [],
+            cores: ["$ffbc1c", "#ff1c1c", "#ff85e1", "#52a7ff", "#78ff5d"],
+
+            insere: function() {// essa função inserirá os obstáculos na tela
+                this._obs.push({
+                    x: LARGURA,
+                    largura: 30 + Math.floor(21 * Math.random()),//aqui fará com que a largura dele seja aleatória que varia de 30 a 50 pixels
+                    altura: 30 + Math.floor(120 * Math.random()),//já aqui definirá uma altura entre 30 e 120 pixels
+                    cor: this.cores[Math.floor(5 * Math.random())]//aqui ele sortea a cor de uma das cinco definidas na variavel cores
+                })
+            },
+
+            atualizar: function() {
+
+            },
+
+            desenhar: function() {//essa função desenhará os obstaculos sorteando as cores e medidas.
+                for (var i = 0, tam = this._obs.length; i < tam; i++){
+                    var obs = this._obs[i]
+                    contexto.fillStyle = obs.cor
+                    contexto.fillRect(obs.x, chao.y - obs.altura, obs.largura, obs.altura)
+                }
             }
         }
 
@@ -86,6 +112,7 @@ var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3,
             contexto.fillStyle = "#50beff"
             contexto.fillRect(0, 0, LARGURA, ALTURA)
             chao.desenhar()
+            obstaculos.desenhar()
             bloco.desenhar()
         }
 
