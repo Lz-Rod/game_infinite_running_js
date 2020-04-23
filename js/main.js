@@ -1,4 +1,4 @@
-var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3,
+var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3, velocidade = 6,
 
         chao = {
             y: 550,
@@ -49,6 +49,7 @@ var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3,
         obstaculos = {
             _obs: [],
             cores: ["$ffbc1c", "#ff1c1c", "#ff85e1", "#52a7ff", "#78ff5d"],
+            tempoInsere: 0,
 
             insere: function() {// essa função inserirá os obstáculos na tela
                 this._obs.push({
@@ -57,10 +58,27 @@ var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3,
                     altura: 30 + Math.floor(120 * Math.random()),//já aqui definirá uma altura entre 30 e 120 pixels
                     cor: this.cores[Math.floor(5 * Math.random())]//aqui ele sortea a cor de uma das cinco definidas na variavel cores
                 })
+
+                this.tempoInsere = 30 + Math.floor(20 * Math.random())// faz o jogo gerar os espaços entre os obstaculos de forma randomica
             },
 
-            atualizar: function() {
+            atualizar: function() {//faz os obstaculos andar pela tela.
+                if(this.tempoInsere == 0)// faz ele inserir um novo obstaculo somente quando o tempoo for igual a 0
+                    this.insere()
+                else
+                    this.tempoInsere--
 
+                for (var i = 0, tam = this._obs.length; i < tam; i++){
+                    var obs = this._obs[i]
+
+                    obs.x -= velocidade
+
+                    if(obs.x <= -obs.largura){
+                        this._obs.splice(i, 1)// faz o obstaculo sumir ao chegar a borda esquerda da tela
+                        tam--//corrige o erro do for tentar acessar um elemento que foi removido
+                        i--
+                    }
+                }
             },
 
             desenhar: function() {//essa função desenhará os obstaculos sorteando as cores e medidas.
@@ -105,6 +123,7 @@ var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3,
         function atualizar(){
             frames++
             bloco.atualizar()
+            obstaculos.atualizar()
 
             
         }
