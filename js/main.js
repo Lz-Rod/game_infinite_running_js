@@ -1,4 +1,11 @@
 var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3, velocidade = 6,
+estadoAtual,
+
+        estados = {
+            jogar: 0,
+            jogando: 1,
+            perdeu: 2
+        },
 
         chao = {
             y: 550,
@@ -26,9 +33,10 @@ var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3, velocidade = 6,
                 this.velocidade += this.gravidade
                 this.y += this.velocidade
 
-                if (this.y > chao.y - this.altura){// esse if faz com que o bloco não passe do chão
+                if (this.y > chao.y - this.altura && estadoAtual != estados.perdeu){// esse if faz com que o bloco não passe do chão && com que o bloco caia quando o jogador perder
                 this.y = chao.y - this.altura
                 this.qntPulos = 0//zera os pulos quando o personagem encosta no chão
+                this.velocidade = 0//zera a velocidade enquanto o bloco esta no chão.
                 }
             },
 
@@ -48,7 +56,7 @@ var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3, velocidade = 6,
         
         obstaculos = {
             _obs: [],
-            cores: ["$ffbc1c", "#ff1c1c", "#ff85e1", "#52a7ff", "#78ff5d"],
+            cores: ["$ffbc1c", "#ff1c1c", "#ff85e1", "#2b5970", "#78ff5d"],
             tempoInsere: 0,
 
             insere: function() {// essa função inserirá os obstáculos na tela
@@ -73,12 +81,20 @@ var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3, velocidade = 6,
 
                     obs.x -= velocidade
 
-                    if(obs.x <= -obs.largura){
+                    if(bloco.x < obs.x + obs.largura && bloco.x + bloco.largura >= obs.x && bloco.y + bloco.altura >= chao.y - obs.altura){
+                        estadoAtual = estados.perdeu// faz com que no momento que o jogador esbarra num obstaculo ele perca.
+                    }
+
+                    else if(obs.x <= -obs.largura){
                         this._obs.splice(i, 1)// faz o obstaculo sumir ao chegar a borda esquerda da tela
                         tam--//corrige o erro do for tentar acessar um elemento que foi removido
                         i--
                     }
                 }
+            },
+
+            limpa: function() {
+                this._obs = []// essa função zera o vetos _obs
             },
 
             desenhar: function() {//essa função desenhará os obstaculos sorteando as cores e medidas.
@@ -109,10 +125,19 @@ var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3, velocidade = 6,
 
             document.addEventListener("mousedown",clique)
 
+            estadoAtual = estados.jogar
             executar()
         }
         function clique(event){
-            bloco.pula()
+            if (estadoAtual == estados.jogando){
+                bloco.pula()
+            } else if (estadoAtual == estados.jogar){
+                estadoAtual = estados.jogando
+            } else if (estadoAtual == estados.perdeu && bloco.y >= 2 * ALTURA){
+                estadoAtual = estados.jogar
+                bloco.velocidade = 0
+                bloco.y = 0
+            }
         }
         function executar(){
             atualizar()
@@ -123,15 +148,28 @@ var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3, velocidade = 6,
         function atualizar(){
             frames++
             bloco.atualizar()
-            obstaculos.atualizar()
 
-            
+            if (estadoAtual == estados.jogando){
+                obstaculos.atualizar()
+            } else if (estadoAtual == estados.perdeu){
+                obstaculos.limpa()
+            }           
         }
         function desenhar(){
             contexto.fillStyle = "#50beff"
             contexto.fillRect(0, 0, LARGURA, ALTURA)
-            chao.desenhar()
+            
+        if (estadoAtual == estados.jogar){
+            contexto.fillStyle = "green"
+            contexto.fillRect(LARGURA / 2 - 50, ALTURA / 2 - 50, 100, 100)// cria o quadrado verde para iniciar o jogo
+        } else if (estadoAtual == estados.perdeu){
+            contexto.fillStyle = "red"
+            contexto.fillRect(LARGURA / 2 - 50, ALTURA / 2 - 50, 100, 100)// cria o quadrado vermelho que indica que o jogador perdeu
+        } else if (estadoAtual == estados.jogando){
             obstaculos.desenhar()
+        }        
+
+            chao.desenhar()
             bloco.desenhar()
         }
 
