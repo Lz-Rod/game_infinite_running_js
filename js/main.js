@@ -1,4 +1,4 @@
-var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3, velocidade = 6,
+var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3, velocidade = 8,
 estadoAtual,
 
         estados = {
@@ -28,6 +28,7 @@ estadoAtual,
             velocidade: 0,
             forcaDoPulo: 23.6,
             qntPulos: 0,
+            score: 0,
 
             atualizar: function() {
                 this.velocidade += this.gravidade
@@ -48,6 +49,12 @@ estadoAtual,
                 }
             },
 
+            reset: function(){
+                this.velocidade = 0
+                this.y = 0
+                this.score = 0
+            },
+
             desenhar: function() {
                 contexto.fillStyle = this.cor//define a cor do bloco
                 contexto.fillRect(this.x, this.y, this.altura, this.largura)// cria o objeto a partir doas informações do bloco
@@ -62,12 +69,13 @@ estadoAtual,
             insere: function() {// essa função inserirá os obstáculos na tela
                 this._obs.push({
                     x: LARGURA,
-                    largura: 30 + Math.floor(21 * Math.random()),//aqui fará com que a largura dele seja aleatória que varia de 30 a 50 pixels
+                    //largura: 30 + Math.floor(21 * Math.random()),//aqui fará com que a largura dele seja aleatória que varia de 30 a 50 pixels
+                    largura: 50,
                     altura: 30 + Math.floor(120 * Math.random()),//já aqui definirá uma altura entre 30 e 120 pixels
                     cor: this.cores[Math.floor(5 * Math.random())]//aqui ele sortea a cor de uma das cinco definidas na variavel cores
                 })
 
-                this.tempoInsere = 30 + Math.floor(20 * Math.random())// faz o jogo gerar os espaços entre os obstaculos de forma randomica
+                this.tempoInsere = 30 + Math.floor(21 * Math.random())// faz o jogo gerar os espaços entre os obstaculos de forma randomica
             },
 
             atualizar: function() {//faz os obstaculos andar pela tela.
@@ -83,6 +91,10 @@ estadoAtual,
 
                     if(bloco.x < obs.x + obs.largura && bloco.x + bloco.largura >= obs.x && bloco.y + bloco.altura >= chao.y - obs.altura){
                         estadoAtual = estados.perdeu// faz com que no momento que o jogador esbarra num obstaculo ele perca.
+                    }
+
+                    else if(obs.x == 0){
+                        bloco.score++
                     }
 
                     else if(obs.x <= -obs.largura){
@@ -135,8 +147,8 @@ estadoAtual,
                 estadoAtual = estados.jogando
             } else if (estadoAtual == estados.perdeu && bloco.y >= 2 * ALTURA){
                 estadoAtual = estados.jogar
-                bloco.velocidade = 0
-                bloco.y = 0
+                obstaculos.limpa()
+                bloco.reset()
             }
         }
         function executar(){
@@ -151,21 +163,39 @@ estadoAtual,
 
             if (estadoAtual == estados.jogando){
                 obstaculos.atualizar()
-            } else if (estadoAtual == estados.perdeu){
-                obstaculos.limpa()
-            }           
+            }       
         }
         function desenhar(){
             contexto.fillStyle = "#50beff"
             contexto.fillRect(0, 0, LARGURA, ALTURA)
+
+            contexto.fillStyle = "#fff"
+            contexto.font = "50px Arial"
+            contexto.fillText(bloco.score, 30, 68)
             
         if (estadoAtual == estados.jogar){
             contexto.fillStyle = "green"
             contexto.fillRect(LARGURA / 2 - 50, ALTURA / 2 - 50, 100, 100)// cria o quadrado verde para iniciar o jogo
-        } else if (estadoAtual == estados.perdeu){
+        }
+        
+        else if (estadoAtual == estados.perdeu){
             contexto.fillStyle = "red"
             contexto.fillRect(LARGURA / 2 - 50, ALTURA / 2 - 50, 100, 100)// cria o quadrado vermelho que indica que o jogador perdeu
-        } else if (estadoAtual == estados.jogando){
+
+            contexto.save()//mostra a pontuação no quadrado vermelho do perdeu.
+            contexto.translate(LARGURA/2, ALTURA/2)
+            contexto.fillStyle = "#fff"
+            if(bloco.score<10){
+                contexto.fillText(bloco.score, -13, 19)
+            }else if(bloco.score >= 10 && bloco.score <100){
+                contexto.fillText(bloco.score, -26, 19)
+            }else{
+                contexto.fillText(bloco.score, -39, 19)
+            }
+            contexto.restore()
+        }
+        
+        else if (estadoAtual == estados.jogando){
             obstaculos.desenhar()
         }        
 
