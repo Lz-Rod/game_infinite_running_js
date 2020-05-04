@@ -1,5 +1,5 @@
 var canvas, contexto, ALTURA, LARGURA, frames = 0, maxPulos = 3, velocidade = 8,
-estadoAtual,
+estadoAtual, record,
 
         estados = {
             jogar: 0,
@@ -52,6 +52,11 @@ estadoAtual,
             reset: function(){
                 this.velocidade = 0
                 this.y = 0
+                if(this.score > record){
+                    localStorage.setItem("record", this.score)
+                    record = this.score
+                }
+
                 this.score = 0
             },
 
@@ -138,6 +143,12 @@ estadoAtual,
             document.addEventListener("mousedown",clique)
 
             estadoAtual = estados.jogar
+            record = localStorage.getItem("record")//armazena pontuação
+
+            if (record == null){
+                record = 0
+            }
+
             executar()
         }
         function clique(event){
@@ -185,6 +196,17 @@ estadoAtual,
             contexto.save()//mostra a pontuação no quadrado vermelho do perdeu.
             contexto.translate(LARGURA/2, ALTURA/2)
             contexto.fillStyle = "#fff"
+
+            if(bloco.score > record){
+                contexto.fillText("Novo Record!", -150, -65)//exibe o texto novo record na tela
+            }else if(record < 10){
+                contexto.fillText("Record " + record, - 99, -65)
+            }else if(record >= 10 && record < 100){
+                contexto.fillText("Record " + record, -112, -65)
+            }else{
+                contexto.fillText("Record " + record, -125, -65)
+            }
+
             if(bloco.score<10){
                 contexto.fillText(bloco.score, -13, 19)
             }else if(bloco.score >= 10 && bloco.score <100){
